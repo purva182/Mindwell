@@ -11,6 +11,8 @@ export interface Profile {
   role: 'patient' | 'counselor' | 'admin';
   phone: string | null;
   date_of_birth: string | null;
+  parent_phone: string | null;
+  emergency_contact_name: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -63,7 +65,7 @@ export const useAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, role: 'patient' | 'counselor') => {
+  const signUp = async (email: string, password: string, fullName: string, role: 'patient' | 'counselor', parentPhone?: string, emergencyContactName?: string) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
@@ -74,7 +76,9 @@ export const useAuth = () => {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
-            role: role
+            role: role,
+            parent_phone: parentPhone,
+            emergency_contact_name: emergencyContactName
           }
         }
       });

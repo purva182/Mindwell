@@ -38,6 +38,51 @@ export type Database = {
         }
         Relationships: []
       }
+      emergency_alerts: {
+        Row: {
+          alert_message: string | null
+          alert_sent_to_counselor: boolean
+          alert_sent_to_parent: boolean
+          counselor_email: string | null
+          created_at: string
+          id: string
+          parent_phone: string | null
+          questionnaire_type: string
+          severity_level: string
+          total_score: number
+          user_id: string
+          user_location: string | null
+        }
+        Insert: {
+          alert_message?: string | null
+          alert_sent_to_counselor?: boolean
+          alert_sent_to_parent?: boolean
+          counselor_email?: string | null
+          created_at?: string
+          id?: string
+          parent_phone?: string | null
+          questionnaire_type: string
+          severity_level: string
+          total_score: number
+          user_id: string
+          user_location?: string | null
+        }
+        Update: {
+          alert_message?: string | null
+          alert_sent_to_counselor?: boolean
+          alert_sent_to_parent?: boolean
+          counselor_email?: string | null
+          created_at?: string
+          id?: string
+          parent_phone?: string | null
+          questionnaire_type?: string
+          severity_level?: string
+          total_score?: number
+          user_id?: string
+          user_location?: string | null
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           category: string
@@ -115,8 +160,10 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           email: string
+          emergency_contact_name: string | null
           full_name: string | null
           id: string
+          parent_phone: string | null
           phone: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
@@ -126,8 +173,10 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           email: string
+          emergency_contact_name?: string | null
           full_name?: string | null
           id?: string
+          parent_phone?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -137,8 +186,10 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           email?: string
+          emergency_contact_name?: string | null
           full_name?: string | null
           id?: string
+          parent_phone?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -172,6 +223,36 @@ export type Database = {
           responses?: Json
           severity_level?: string
           total_score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_permissions: {
+        Row: {
+          data_sharing_permission: boolean
+          emergency_contact_permission: boolean
+          granted_at: string
+          id: string
+          location_permission: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          data_sharing_permission?: boolean
+          emergency_contact_permission?: boolean
+          granted_at?: string
+          id?: string
+          location_permission?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          data_sharing_permission?: boolean
+          emergency_contact_permission?: boolean
+          granted_at?: string
+          id?: string
+          location_permission?: boolean
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import EmergencyAlertSystem from '@/components/EmergencyAlertSystem';
 
 const PHQ9_QUESTIONS = [
   "Little interest or pleasure in doing things",
@@ -45,6 +46,8 @@ export default function PHQ9Questionnaire({ onComplete, onClose }: PHQ9Questionn
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [responses, setResponses] = useState<Record<number, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showEmergencyAlert, setShowEmergencyAlert] = useState(false);
+  const [alertData, setAlertData] = useState<{ score: number; severity: string } | null>(null);
 
   const handleResponse = (value: string) => {
     setResponses(prev => ({ ...prev, [currentQuestion]: value }));
@@ -88,6 +91,12 @@ export default function PHQ9Questionnaire({ onComplete, onClose }: PHQ9Questionn
         description: `Your PHQ-9 score: ${totalScore}/27 (${level})`,
       });
 
+      // Trigger emergency alert if needed
+      if (level === 'Moderately Severe' || level === 'Severe') {
+        setAlertData({ score: totalScore, severity: level });
+        setShowEmergencyAlert(true);
+      }
+
       onComplete(totalScore, level);
     } catch (error: any) {
       console.error('Error submitting PHQ-9:', error);
@@ -105,7 +114,15 @@ export default function PHQ9Questionnaire({ onComplete, onClose }: PHQ9Questionn
   const currentResponse = responses[currentQuestion] || "";
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <>
+      {showEmergencyAlert && alertData && (
+        <EmergencyAlertSystem 
+          score={alertData.score}
+          severity={alertData.severity}
+          questionnaireType="PHQ9"
+        />
+      )}
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <CardHeader>
           <CardTitle className="text-center">PHQ-9 Depression Assessment</CardTitle>
@@ -159,6 +176,7 @@ export default function PHQ9Questionnaire({ onComplete, onClose }: PHQ9Questionn
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </>
   );
 }

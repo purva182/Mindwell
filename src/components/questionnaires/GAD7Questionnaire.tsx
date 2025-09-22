@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import EmergencyAlertSystem from '@/components/EmergencyAlertSystem';
 
 const GAD7_QUESTIONS = [
   "Feeling nervous, anxious, or on edge",
@@ -42,6 +43,8 @@ export default function GAD7Questionnaire({ onComplete, onClose }: GAD7Questionn
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [responses, setResponses] = useState<Record<number, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showEmergencyAlert, setShowEmergencyAlert] = useState(false);
+  const [alertData, setAlertData] = useState<{ score: number; severity: string } | null>(null);
 
   const handleResponse = (value: string) => {
     setResponses(prev => ({ ...prev, [currentQuestion]: value }));
@@ -85,6 +88,12 @@ export default function GAD7Questionnaire({ onComplete, onClose }: GAD7Questionn
         description: `Your GAD-7 score: ${totalScore}/21 (${level})`,
       });
 
+      // Trigger emergency alert if needed
+      if (level === 'Severe' || level === 'Moderately Severe') {
+        setAlertData({ score: totalScore, severity: level });
+        setShowEmergencyAlert(true);
+      }
+
       onComplete(totalScore, level);
     } catch (error: any) {
       console.error('Error submitting GAD-7:', error);
@@ -102,7 +111,15 @@ export default function GAD7Questionnaire({ onComplete, onClose }: GAD7Questionn
   const currentResponse = responses[currentQuestion] || "";
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <>
+      {showEmergencyAlert && alertData && (
+        <EmergencyAlertSystem 
+          score={alertData.score}
+          severity={alertData.severity}
+          questionnaireType="GAD7"
+        />
+      )}
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <CardHeader>
           <CardTitle className="text-center">GAD-7 Anxiety Assessment</CardTitle>
@@ -156,6 +173,7 @@ export default function GAD7Questionnaire({ onComplete, onClose }: GAD7Questionn
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </>
   );
 }

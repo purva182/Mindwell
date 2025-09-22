@@ -17,6 +17,8 @@ export default function Auth() {
     password: '',
     fullName: '',
     role: 'patient' as 'patient' | 'counselor',
+    parentPhone: '',
+    emergencyContactName: '',
   });
 
   if (loading) {
@@ -35,7 +37,7 @@ export default function Auth() {
     e.preventDefault();
     
     if (isSignUp) {
-      await signUp(formData.email, formData.password, formData.fullName, formData.role);
+      await signUp(formData.email, formData.password, formData.fullName, formData.role, formData.parentPhone, formData.emergencyContactName);
     } else {
       await signIn(formData.email, formData.password);
     }
@@ -185,6 +187,35 @@ export default function Auth() {
                       </div>
                     </RadioGroup>
                   </div>
+
+                  {/* Emergency Contact Information - Only for patients */}
+                  {formData.role === 'patient' && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="emergencyContactName">Emergency Contact Name</Label>
+                        <Input
+                          id="emergencyContactName"
+                          type="text"
+                          placeholder="Parent/Guardian name"
+                          value={formData.emergencyContactName}
+                          onChange={(e) => handleInputChange('emergencyContactName', e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="parentPhone">Emergency Contact Phone</Label>
+                        <Input
+                          id="parentPhone"
+                          type="tel"
+                          placeholder="Parent/Guardian phone number"
+                          value={formData.parentPhone}
+                          onChange={(e) => handleInputChange('parentPhone', e.target.value)}
+                          required
+                        />
+                      </div>
+                    </>
+                  )}
 
                   <Button type="submit" className="w-full">
                     <Heart className="w-4 h-4 mr-2" />
