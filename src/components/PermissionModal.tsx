@@ -31,7 +31,12 @@ export default function PermissionModal({ onComplete }: PermissionModalProps) {
           setCurrentLocation(`${latitude},${longitude}`);
         },
         (error) => {
-          console.error('Error getting location:', error);
+          console.error('Error getting location');
+          toast({
+            title: "Location Error",
+            description: "Could not get your current location.",
+            variant: "destructive",
+          });
         }
       );
     }
@@ -62,9 +67,18 @@ export default function PermissionModal({ onComplete }: PermissionModalProps) {
 
       if (error) throw error;
 
-      // Store location if granted
+      // Store encrypted location in localStorage if permission granted
       if (permissions.location && currentLocation) {
-        localStorage.setItem('userLocation', currentLocation);
+        // Simple encryption using btoa (base64) - in production, use proper encryption
+        const encryptedLocation = btoa(currentLocation + '|' + Date.now());
+        localStorage.setItem('userLocation', encryptedLocation);
+        
+        // Set expiration (24 hours)
+        localStorage.setItem('userLocationExpiry', (Date.now() + 24 * 60 * 60 * 1000).toString());
+      } else {
+        // Clean up location data if permission not granted
+        localStorage.removeItem('userLocation');
+        localStorage.removeItem('userLocationExpiry');
       }
 
       toast({

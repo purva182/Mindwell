@@ -36,7 +36,26 @@ export default function EmergencyAlertSystem({ score, severity, questionnaireTyp
       // Get user location if permission granted
       let userLocation = '';
       if (permissions?.location_permission) {
-        userLocation = localStorage.getItem('userLocation') || '';
+        const encryptedLocation = localStorage.getItem('userLocation');
+        const expiry = localStorage.getItem('userLocationExpiry');
+        
+        if (encryptedLocation && expiry && Date.now() < parseInt(expiry)) {
+          try {
+            // Decrypt the location data
+            const decrypted = atob(encryptedLocation);
+            const [location] = decrypted.split('|');
+            userLocation = location;
+          } catch (error) {
+            console.error('Error decrypting location data');
+            // Clean up corrupted data
+            localStorage.removeItem('userLocation');
+            localStorage.removeItem('userLocationExpiry');
+          }
+        } else {
+          // Clean up expired data
+          localStorage.removeItem('userLocation');
+          localStorage.removeItem('userLocationExpiry');
+        }
       }
 
       // Get counselor information
@@ -98,6 +117,9 @@ export default function EmergencyAlertSystem({ score, severity, questionnaireTyp
           message: alertMessage,
           hasLocationPermission: permissions?.location_permission || false,
           hasEmergencyContactPermission: permissions?.emergency_contact_permission || false
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
         }
       });
 

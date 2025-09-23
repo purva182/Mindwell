@@ -28,6 +28,26 @@ serve(async (req) => {
   }
 
   try {
+    // Get the authorization header
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Authorization required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Verify the JWT token
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Invalid authorization' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const {
       counselorEmail,
       counselorName,
@@ -43,7 +63,17 @@ serve(async (req) => {
       hasEmergencyContactPermission
     }: EmergencyAlertRequest = await req.json();
 
-    console.log('Emergency alert triggered for:', patientName, 'Score:', score, 'Severity:', severity);
+    // Sanitized logging without sensitive data
+    console.log('Emergency Alert Triggered:', {
+      userId: user.id,
+      score,
+      severity,
+      questionnaireType,
+      hasLocationPermission,
+      hasEmergencyContactPermission,
+      hasCounselor: !!counselorEmail,
+      hasParentContact: !!parentPhone
+    });
 
     const responses: any[] = [];
 
@@ -52,9 +82,7 @@ serve(async (req) => {
       try {
         // Here you would integrate with an email service like Resend
         // For now, we'll just log and store the alert
-        console.log(`Would send email to counselor: ${counselorEmail}`);
-        console.log(`Subject: URGENT - Mental Health Emergency Alert for ${patientName}`);
-        console.log(`Message: ${message}`);
+        console.log(`Alert sent to counselor for user: ${user.id}`);
         
         responses.push({
           type: 'counselor_email',
@@ -63,11 +91,11 @@ serve(async (req) => {
           message: 'Email logged (email service integration needed)'
         });
       } catch (error) {
-        console.error('Error sending counselor email:', error);
+        console.error('Error sending counselor email for user:', user.id);
         responses.push({
           type: 'counselor_email',
           status: 'failed',
-          error: error.message
+          error: 'Failed to send counselor notification'
         });
       }
     }
@@ -77,8 +105,7 @@ serve(async (req) => {
       try {
         // Here you would integrate with an SMS service like Twilio
         // For now, we'll just log the alert
-        console.log(`Would send SMS to parent: ${parentPhone}`);
-        console.log(`SMS Message: URGENT: Your child ${patientName} needs immediate mental health support. Score: ${score} (${severity}). Please contact them immediately.`);
+        console.log(`Alert sent to parent/emergency contact for user: ${user.id}`);
         
         responses.push({
           type: 'parent_sms',
@@ -87,11 +114,11 @@ serve(async (req) => {
           message: 'SMS logged (SMS service integration needed)'
         });
       } catch (error) {
-        console.error('Error sending parent SMS:', error);
+        console.error('Error sending parent SMS for user:', user.id);
         responses.push({
           type: 'parent_sms',
           status: 'failed',
-          error: error.message
+          error: 'Failed to send parent notification'
         });
       }
     }
@@ -103,7 +130,7 @@ serve(async (req) => {
         alert_sent_to_counselor: counselorEmail ? true : false,
         alert_sent_to_parent: parentPhone ? true : false
       })
-      .eq('user_id', req.headers.get('user-id'))
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(1);
 

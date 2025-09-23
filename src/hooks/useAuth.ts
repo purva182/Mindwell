@@ -40,7 +40,7 @@ export const useAuth = () => {
               .single();
 
             if (error) {
-              console.error('Error fetching profile:', error);
+              console.error('Error fetching profile');
             } else {
               setProfile(profileData);
             }
