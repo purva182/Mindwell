@@ -1,1 +1,7 @@
 project_id = "okmttxaegfbpxtuilzuc"
+
+[functions.send-emergency-alert]
+verify_jwt = false
+
+[functions.sync-user-data]
+verify_jwt = false
