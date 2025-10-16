@@ -19,6 +19,27 @@ npm i
 npm run dev
 ```
 
+Launch the Backend (Chatbot API)
+
+The backend is built with FastAPI and serves the AI responses for the chat interface.
+
+```# Step 1: Navigate to the backend directory.
+cd chatbot
+
+# Step 2: Create and activate a Python virtual environment.
+python -m venv env          # Create venv
+# Activate on Windows:
+env\Scripts\activate
+
+# Step 3: Install the required Python dependencies.
+pip install -r requirements.txt
+
+# Step 4: Launch the backend server using uvicorn.
+uvicorn manamitra_chatbot:app --reload --host 0.0.0.0 --port 8000
+
+```
+The backend API will be available at: http://localhost:8000.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
