@@ -1,0 +1,14 @@
+streamlit
+langchain
+langchain_groq
+pandas
+numpy
+vaderSentiment
+textblob
+plotly
+matplotlib
+seaborn
+requests
+fastapi
+uvicorn
+python.dotenv
